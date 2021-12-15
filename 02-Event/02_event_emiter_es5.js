@@ -39,7 +39,7 @@ const radio = new Radio();
 radio.setMaxListeners(5);
 
 /**
- * 6) 이벤트 리스너에 이벤트 핸들러 연결하기 --< 이벤트 이름은 사용자가 직접 정의
+ * 6) 이벤트 리스너에 이벤트 핸들러 연결하기 --> 이벤트 이름은 사용자가 직접 정의
  * -----------------------
  * emitter.on('eventname','listener function')
  * emitter.addListener('eventname','listener function')
