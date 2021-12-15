@@ -5,7 +5,7 @@
  const fs = require('fs'); // FileSystem 모듈 참조
  const target = './output_async.txt'; //저장할 파일의 경로()
  const content = 'Hello World'; //저장할 내용
- const isExists = fs.existsSync(target);//파일의 존재 여부 검사
+ const isExists = fs.existsSync(target);//파일의 존재 여부 검사(true, false 리턴)
  
  if(!isExists){
     /**
