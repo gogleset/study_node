@@ -11,7 +11,6 @@ console.debug()
 console.groupEnd();
 
 // 3) 사용자 계정정보
-
 const userInfo = os.userInfo();
 
 console.group('사용자 계정정보');

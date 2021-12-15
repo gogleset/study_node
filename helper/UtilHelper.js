@@ -16,13 +16,12 @@ module.exports.myip = () => {
         const item = nets[attr];
         console.log(nets[attr]);
 
-        // item에서 v.familly의 값이 IPv4와 v.address가 127.0.0.1로 값이 되있다면 ipAddress의 배열에 v.address값을 배열에 넣어줌
+        // item에서 v.familly의 값이 IPv4와 v.address가 127.0.0.1로 값이 다르다면 ipAddress의 배열에 v.address값을 배열에 넣어줌
         item.map((v,i) => {
             if(v.family == 'IPv4' && v.address != '127.0.0.1'){
                 ipAddress.push(v.address);
             }
         });
     }
-
     return ipAddress;
 };
