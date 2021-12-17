@@ -8,7 +8,9 @@ const schedule = require('node-schedule');
 
 // 2)매 분 30초마다 수행
 const rule1 = new schedule.RecurrenceRule();
+//RecurrenceRule = 반복규칙
 rule1.second = 30;
+console.log(typeof rule1.second);
 schedule.scheduleJob(rule1, () => logger.info('매분 ' + rule1.second + '초 마다 수행!!'));
 
 
