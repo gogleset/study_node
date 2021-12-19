@@ -16,6 +16,7 @@ let req = http.get(url, function(res){
     res.on('end', function(){
         console.debug(resData);
     });
+    
 });
 
 

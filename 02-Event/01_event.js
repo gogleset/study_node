@@ -27,3 +27,5 @@ setTimeout(() => {
 
 // 앞의 코드가 기능 정의 혹은 실행 예약이므로 이 라인이 가장 먼저 실행된다.
 console.debug("------프로그램 흐름 종료-------");
+
+console.log(process.env);

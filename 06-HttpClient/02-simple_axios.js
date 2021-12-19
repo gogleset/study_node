@@ -5,7 +5,6 @@ const axios = require("axios")
 const url = "http://itpaper.co.kr/data/simple_text.txt";
 
 // 3) GET 방식으로 접속하기 위한 객체 생성
-
 axios
   .get(url).then((response) => {
     // 지정된 url의 컨텐츠를 성공적으로 가져온 경우 호출

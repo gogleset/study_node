@@ -48,7 +48,7 @@ const logger = winston.createLogger({
         printf((info) => {
             return `${info.timestamp} [${info.level}]: ${info.message}`;
         }),
-        splat()
+        splat() //줄바꿈
     ),
     // 일반 로그 규칙 정의
     transports: [

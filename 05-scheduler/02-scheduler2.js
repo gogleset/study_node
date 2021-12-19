@@ -27,7 +27,7 @@ rule3.minute = 03;
 rule3.second = 20;
 schedule.scheduleJob(rule3, () => logger.warn('매일 ' + rule.hour+ '시 ' + rule3.minute+' 분 ' + rule3.second + '초마다 수행', rule3.hour, rule3.minute, rule3.second));
 
-// 일주일 중 0요일을 기준으로 1번째 ~ 5번째 요일까지(0=sun, 6=sat)
+// 일주일 중 0요일을 포함, 1번째 ~ 5번째 요일까지(0=sun, 6=sat)
 const rule4 = new schedule.RecurrenceRule();
 rule4.dayOfWeek = [0, new schedule.Range(1, 5)];
 rule4.second = 45;

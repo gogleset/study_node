@@ -3,11 +3,11 @@
 // 윈스턴 모듈화
 
 // 1)패키지 참조
-const fileHelper = require("./FileHelper"); //로그처리모듈
-const winston = require("winston");
-const winstonDaily = require("winston-daily-rotate-file");
+const fileHelper = require("./FileHelper"); //폴더처리모듈
+const winston = require("winston");//로그처리모듈
+const winstonDaily = require("winston-daily-rotate-file");//로그파일을 만들어줌
 const path = require("path");
-const config = require("./_config");
+const config = require("./_config");//path
 
 // 2)로그가 저장될 폴더 생성
 fileHelper.mkdir(config.log.debug.path);
