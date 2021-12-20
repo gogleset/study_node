@@ -25,3 +25,10 @@ req.on('error', function(err){
     console.error(err);
     console.error('에러발생 : ' + err.message);
 })
+
+
+// 노드 js는 서버역할도 가능하지만, 클라이언트도 가능하다
+// 크로스 도메인이슈 = CORS, 노드 js가 open api에 대신 접근하면 CORS이슈 x
+// 노드js도 내장메소드를 통해 http통신
+// res가 데이터 수신 -> 조금씩 쪼개서 받음
+// 'end' 이벤트가 받는다

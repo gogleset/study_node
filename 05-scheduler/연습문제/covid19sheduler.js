@@ -44,6 +44,10 @@ const de = async () => {
   }
 };
 
+
 const time = new timer.RecurrenceRule();
 // time.second = 30;
 timer.scheduleJob("* * * * *", () => de());
+timer.scheduleJob("*/2 * * * *", () => {
+  content = null;
+})

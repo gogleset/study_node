@@ -31,3 +31,10 @@ const url = "http://itpaper.co.kr/data/post.php";
 
   console.log('다른 백엔드로부터 응답받은 결과값: ' + result);
 })();
+
+// post 방식은 백엔드에 전달될 값을 http 헤더로보냄
+// get 방식으로 데이터를 전달하면 get으로 받고, post 방식으로 데이터를 주면 post방식으로 받아야한다.
+// 처리속도는 get방식이 빠르지만, 보안에 취약
+// 대용량처리와 약간의 보안이 있는 건 post방식(get, post로 방식이 나뉜다. 나머지는 post랑 전송방식이 같음)
+// 첨부파일이 있을 땐 multiport-formdata
+
