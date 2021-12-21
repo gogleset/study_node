@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function start() {
+            // 이 코드가 정상실행되기 위해서는 브라우저가 HTML 코드를 끝까지 해석한 후에 실행되어야 한다.
+            const foo = document.getElementById("foo");
+            foo.innerHTML = "Hello World 진";
+        }
+    </script>
+    
+</head>
+<!-- 
+        body 태그의 onload속성은 브라우저가 HTML을 끝까지 해석한 직후에 지정된 함수를 호출한다.
+        장점: 고전적인 바닐라스크립트 처리 중에서 가장 간결.
+        단점: HTML 태그와 JS구문이 뒤섞이게 되어 유지보수에 좋지 않다
+
+        Javascript의 고도화는 이러한 스파게티 코드로부터 HTML과 JS를 분리하는 것부터 시작된다.
+     -->
+<body onload="start()">
+    <h1 id='foo'>  </h1>
+</body>
+</html>

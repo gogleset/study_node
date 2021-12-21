@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #myphoto {
+            display: none;
+        }
+
+        .upload-btn {
+            padding: 6px 25px;
+            background-color:#FF6600;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <label for="myphoto" class='upload-btn'>
+            업로드
+        </label>
+        <input type='file' name='myphoto' multiple id='myphoto'/>
+    </form>
+
+    <div id="console"></div>
+
+    <script src="//cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.getElementById("myphoto").addEventListener('change', (e) => {
+            console.log('change~!!');
+            const files = e.target.files;
+            const keys = Object.keys(files);
+            
+            keys.forEach((i, v) => {
+                // javascript로 가상의 form을 생성
+                const form = new FormData();
+                // 가상의 폼에 input요소 추가
+                form.append('myphoto', files[v]);
+                
+                (async () => {
+                    try {
+                        const response = await axios.post("/upload/api", form);
+                        console.log(response.data);
+
+                        /** 원본이미지 */
+                        // const src = response.data.item.url;
+
+                        // const img = document.createElement("img");
+                        // img.src = src;
+                        // img.width = 100;
+                        // img.height = 100;
+
+                        // document.getElementById("console").appendChild(img);
+
+                        /** 썸네일 이미지 생성 */
+                        const thumbnails = response.data.item.thumbnail;
+                        const keys = Object.keys(thumbnails);
+
+                        keys.forEach(v => {
+                            const title = document.createElement("h3");
+                            title.innerHTML = v;
+                            document.getElementById("console").appendChild(title);
+
+                            const img = document.createElement("img");
+                            img.src = thumbnails[v];
+                            document.getElementById("console").appendChild(img);
+                        });
+
+
+                    } catch (error) {
+                        console.error(error);
+                    }
+                })();
+            });
+        });
+    </script>
+</body>
+</html>

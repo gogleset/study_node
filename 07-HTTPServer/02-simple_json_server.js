@@ -1,6 +1,6 @@
 // 모듈참조
-const logger = require("../helper/LogHelper");
-const util = require("../helper/UtilHelper");
+const logger = require("../helper/LogHelper"); //로그 출력
+const util = require("../helper/UtilHelper"); // 나의 ip정보를 가져온다
 const http = require("http");
 
 // 웹서버 구동
@@ -12,7 +12,6 @@ const server = http.createServer(); //웹 서버 객체 만들기
  * 포트번호에 대해 리스닝 시작
  * listen을 시작하면 호출될 콜백함수 지정.
  * listen을 시작 --> backend(server)가 가동을 시작했다는 의미. */
-
 server.listen(port, () => {
   logger.debug(port + "번 포트에서 백엔드가 구동되었습니다.");
   logger.debug("------------------");
@@ -100,9 +99,9 @@ server.on("close", () => {
 });
 
 // 예제이므로 타이머를 통해 백엔드를 60초 후 강제 종료
-setTimeout(() => {
-  server.close();
-}, 60000);
+// setTimeout(() => {
+//   server.close();
+// }, 60000);
 
 // application/json으로 json타입 리턴가능
 // 127.0.0.1:8080 -> 자신의 ip를 가르킴 -> 로컬ip
@@ -111,11 +110,11 @@ setTimeout(() => {
  * 
  * 포트번호는 딱 하나의 프로그램만 점유가능하기 때문에 포트번호는 공유를 못함
  * 
- * CORS = 크로스 도메인문제는 백엔드로 처리해야함
+ * CORS => 크로스 도메인문제는 백엔드로 처리해야함
  * 
  * "Access-Control-Allow-Origin"으로 접근 가능한 ip를 넣고,
  * "Access-Control-Allow-Method"으로 접근 가능한 통신방식을 넣는다.
- * Post Get Put Delete 순으로 Create Read Update Delete,
+ *  Post Get Put Delete 순으로 Create Read Update Delete,
  * 즉 CRUD이며 이 네가지 방식의 통신방식으로 4개의 이벤트를 따로 줄 수 있다.
  * 하나의 URL에 HTTP접근방식에 따라 CRUD를 구분해놓은 형식의 API를 RESTful API라고 한다.
  */
