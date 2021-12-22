@@ -1,0 +1,39 @@
+{
+  "name": "study_node",
+  "version": "1.0.0",
+  "description": "node,express",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "body-parser": "^1.19.1",
+    "cookie-parser": "^1.4.6",
+    "dayjs": "^1.10.7",
+    "express-session": "^1.17.2",
+    "express-useragent": "^1.0.15",
+    "express": "^4.17.2",
+    "form-data": "^4.0.0",
+    "node-schedule": "^2.1.0",
+    "method-override": "^3.0.0",
+    "serve-static": "^1.14.2",
+    "serve-favicon": "^2.5.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "s"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gogleset/study_node.git"
+  },
+  "keywords": [
+    "nope"
+  ],
+  "author": "choij (choij2494@gmail.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gogleset/study_node/issues"
+  },
+  "homepage": "https://github.com/gogleset/study_node#readme"
+}
