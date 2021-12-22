@@ -1,7 +1,7 @@
 /*----------------------------------------------------------
  | 1) 모듈참조
  -----------------------------------------------------------*/
-//직접 구현한 모듈 
+//직접 구현한 모듈
 const logger = require('../helper/LogHelper');
 const util = require('../helper/UtilHelper');
 
@@ -160,7 +160,7 @@ router.route('/send_url/:username/:age').get((req,res,next) => {
         logger.debug(str);
     }
 
-    const html = "<h1><span style = 'color:#0066ff'>"+req.params.username+req.params.age+"</span></h1>"
+    const html = "<h1><span style = 'color:#0066ff'>" + req.params.username + req.params.age+"</span></h1>"
 
     res.status(200).send(html);
 });
