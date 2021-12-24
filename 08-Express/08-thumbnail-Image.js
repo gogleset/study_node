@@ -20,6 +20,8 @@ const methodOverride = require("method-override"); // PUT 파라미터 처리
 const cookieParser = require("cookie-parser"); //Cookie 처리
 const expressSession = require("express-session"); //Session 처리
 const multer = require("multer"); //업로드 모듈, 생성은 라우터 다음에 들어감.(유의!)
+const nodemailer = require("nodemailer"); //메일발송 --> app.use()로 추가설정 필요없음, 자체가 함수
+const thumbnail = require("node-thumbnail").thumb; //썸네일 이미지 생성모듈
 
 /*----------------------------------------------------------
  | 2) Express 객체 생성
@@ -121,8 +123,14 @@ app.use(methodOverride("_method"));
 const public_path = path.join(__dirname, "../public");
 //  static = 지정된 폴더에서 파일을 찾음 하위 폴더를 웹상에 노출시키는게 가능함
 const upload_path = path.join(__dirname, "../_files/upload");
+
+const thumb_path = path.join(__dirname, "../_files/thumb");
+
 app.use("/", static(public_path));
+// --> upload 폴더의 웹 상의 위치 : http://아이피:포트번호/upload
 app.use("/upload", static(upload_path));
+// --> 썸네일 이미지가 생성될 폴더의 웹 상의 위치 : http://아이피:포트번호/thumb
+app.use("/thumb", static(thumb_path));
 
 /** favicon 설정 */
 app.use(favicon(public_path + "/favicon.png"));
@@ -155,10 +163,12 @@ const multipart = multer({
     destination: (req, file, callback) => {
       // 폴더 생성
       fileHelper.mkdir(upload_path);
+      fileHelper.mkdir(thumb_path);
       console.debug(file);
 
       // 업로드 정보에 백엔드의 업로드 파일 저장폴더 위치를 추가한다.
       file.dir = upload_path.replace(/\\/gi, "/");
+      // file.dir = thumb_path.replace(/\\/gi, "/");
 
       // multer 객체에게 업로드 경로를 전달
       callback(null, upload_path);
@@ -172,21 +182,22 @@ const multipart = multer({
       const saveName = new Date().getTime().toString() + extName.toLowerCase();
       // 업로드 정보에 백엔드의 업로드 파일 이름을 추가한다.
       file.savename = saveName;
+      file.path = path.join(file.dir, saveName);
       // 업로드 정보에 파일에 접근할 수 있는 URL값 추가
       file.url = path.join("/upload", saveName).replace(/\\/gi, "/");
 
       // 구성된 정보를 req객체에 추가
       // req.file이 배열이라면?
-      if(req.file instanceof Array){
+      if (req.file instanceof Array) {
         req.file.push(file);
-      }else{
+      } else {
         req.file = file;
       }
       callback(null, saveName);
     },
   }),
   // 용량, 최대 업로드 파일 수 제한 설정
-  limits: {
+  limts: {
     files: 5,
     filesize: 1024 * 1024 * 20,
   },
@@ -544,6 +555,91 @@ router.route("/upload/simple").post((req, res, next) => {
   // name 속성값이 Myphoto인 경우, 업로드를 수행
   const upload = multipart.single("myphoto");
 
+  upload(req, res, async (err) => {
+    let result_code = 200;
+    let result_msg = "ok";
+
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        switch (err.code) {
+          case "LIMIT_FILE_COUNT":
+            err.result_code = 500;
+            err.result_msg = "업로드 가능한 파일 수를 초과했습니다.";
+            break;
+          case "LIMIT_FILE_SIZE":
+            err.result_code = 500;
+            err.result_msg = "업로드 가능한 파일 용량를 초과했습니다.";
+            break;
+          default:
+            err.result_code = 500;
+            err.result_msg = "알 수 없는 에러가 발생했습니다.";
+            break;
+        }
+      }
+      logger.error(err);
+      result_code = err.result_code;
+      result_msg = err.result_msg;
+    }
+    // 업로드 결과에 이사잉 없다면 썸네일 이미지 생성
+    const thumb_size_list = [400, 500, 1000];
+
+    // 원하는 썸네일 사이즈만큼 반복처리
+    for (let i = 0; i < thumb_size_list.length; i++) {
+      const v = thumb_size_list[i];
+
+      // 생성될 썸네일 파일의 옵션과 파일이름을 생성
+      const thumb_options = {
+        source: req.file.path, //썸네일을 생성할 원본 경로
+        destination: thumb_path, //썸네일이 생성될 경로
+        width: v, //썸네일의 크기(기본값 800),
+        prefix: "thumb_",
+        suffix: "_" + v + "w",
+        override: true,
+      };
+
+      // 생성될 썸네일 파일의 이름을 예상
+      const basename = req.file.savename;
+      const filename = basename.substring(0, basename.lastIndexOf("."));
+      const thumbname =
+        thumb_options.prefix +
+        filename +
+        thumb_options.suffix +
+        path.extname(basename);
+
+      // 썸네일 정보를 width를 key로 갖는 json 형태로 추가하기 위해 key이름 생성
+      const key = v + "w";
+
+      // 프론트엔드에게 전송될 정보에 'thumbnail'이라는 프로퍼티가 없다면 빈 Json 형태로 생성
+      if (!req.file.hasOwnProperty("thumbnail")) {
+        req.file.thumbnail = {};
+      }
+
+      req.file.thumbnail[key] = "/thumb/" + thumbname;
+
+      try {
+        await thumbnail(thumb_options);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    const result = {
+      rt: result_code,
+      rtmsg: result_msg,
+      item: req.file,
+    };
+
+    res.status(result_code).send(result);
+  });
+});
+
+router.route("/upload/multiple").post((req, res, next) => {
+  // 요청정보 안에 업로드된 파일의 정보를 저장할 빈 배열 준비
+  req.file = [];
+
+  // name속성이 myphoto이고 multiple 속성이 부여된 다중 업로드를 처리
+  const upload = multipart.array("myphoto");
+
   upload(req, res, (err) => {
     let result_code = 200;
     let result_msg = "ok";
@@ -570,55 +666,110 @@ router.route("/upload/simple").post((req, res, next) => {
       result_msg = err.result_msg;
     }
 
-    const fileInfo = req.file;
-    fileInfo.msg = result_msg;
+    // 업로드 결과에 이상이 없다면 썸네일 이미지 생성
+    const thumb_size_list = [640, 750, 1020];
 
-    res.status(result_code).send(fileInfo);
-  });
-});
+    // 원하는 썸네일 사이즈만큼 반복처리
+    req.file.map((v, i) => {
+      // 원하는 썸네일 사이즈만큼 반복처리
+      thumb_size_list.map(async (w, j) => {
+        // 생성될 썸네일 파일의 옵션과 파일이름을 생성
+        const thumb_options = {
+          source: v.path, //썸네일을 생성할 원본 경로
+          destination: thumb_path, //썸네일이 생성될 경로
+          width: w, //썸네일의 크기(기본값 800),
+          prefix: "thumb_",
+          suffix: "_" + w + "w",
+          override: true,
+        };
 
-router.route('/upload/multiple')
-.post((req, res, next) => {
-  // 요청정보 안에 업로드된 파일의 정보를 저장할 빈 배열 준비
-  req.file = [];
+        // 생성될 썸네일 파일의 이름을 예상
+        const basename = v.savename;
+        const filename = basename.substring(0, basename.lastIndexOf("."));
+        const thumbname =
+          thumb_options.prefix +
+          filename +
+          thumb_options.suffix +
+          path.extname(basename);
 
-  // name속성이 myphoto이고 multiple 속성이 부여된 다중 업로드를 처리
-  const upload = multipart.array('myphoto');
+        // 썸네일 정보를 width를 key로 갖는 json 형태로 추가하기 위해 key이름 생성
+        const key = w + "w";
 
-  upload(req, res, (err) => {
-    let result_code = 200;
-    let result_msg = 'ok';
-
-    if(err){
-      if(err instanceof multer.MulterError){
-        switch (err.code){
-          case "LIMIT_FILE_COUNT":
-            err.result_code = 500;
-            err.result_msg = "업로드 가능한 파일 수를 초과했습니다.";
-            break;
-          case "LIMIT_FILE_SIZE":
-            err.result_code = 500;
-            err.result_msg = "업로드 가능한 파일 용량를 초과했습니다.";
-            break;
-          default:
-            err.result_code = 500;
-            err.result_msg = "알 수 없는 에러가 발생했습니다.";
-            break;
+        // 프론트엔드에게 전송될 정보에 'thumbnail'이라는 프로퍼티가 없다면 빈 Json 형태로 생성
+        if (!v.hasOwnProperty("thumbnail")) {
+          v.thumbnail = {};
         }
-      }
-      logger.error(err);
-      result_code = err.result_code;
-      result_msg = err.result_msg;
-    }
-    const result = { 
+
+        v.thumbnail[key] = "/thumb/" + thumbname;
+
+        try {
+          await thumbnail(thumb_options);
+        } catch (error) {
+          console.error(error);
+        }
+      });
+    });
+
+
+    const result = {
       rt: result_code,
       rtmsg: result_msg,
-      item: req.file
-    }
+      item: req.file,
+    };
 
     res.status(result_code).send(result);
   });
 });
+
+/**07-SendMail.js */
+router.route("/send_mail").post(async (req, res, next) => {
+  /**1) 프론트엔드에서 전달한 사용자 입력값 */
+  const writer_name = req.body.writer_name;
+  let writer_email = req.body.writer_email;
+  const receiver_name = req.body.receiver_name;
+  let receiver_email = req.body.receiver_email;
+  const subject = req.body.subject;
+  const content = req.body.content;
+
+  /**2) 보내는 사람, 받는 사람의 메일주소와 이름 */
+  // 보내는 사람의 이름과 주소
+  if (writer_name) {
+    // ex) 최진 <choij2494@gmail.com>
+    writer_email = writer_name + " <" + writer_email + ">";
+  }
+
+  // 받는 사람의 이름과 주소
+  if (receiver_name) {
+    reciver_email = receiver_name + " <" + receiver_email + ">";
+  }
+
+  /**3) 매일발송정보 구성 */
+  const send_info = {
+    from: writer_email,
+    to: receiver_email,
+    subject: subject,
+    html: content,
+  };
+  logger.debug(JSON.stringify(send_info));
+
+  const smtp = nodemailer.createTransport({
+    host: "smtp.gmail.com", //SMTP 서버명 : smtp.gmail.com
+    port: 465, //SMTP 포트 : 587
+    secure: true, //보안연결(SSL)필요
+    auth: { user: "choij2494@gmail.com", pass: "ootphapvcofbexow" },
+  });
+
+  // 4) 메일 발송 요청
+  try {
+    await smtp.sendMail(send_info);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("error");
+  }
+
+  res.status(200).send("ok");
+});
+
 /*----------------------------------------------------------
  | 6) 설정한 내용을 기반으로 서버 구동 시작
  -----------------------------------------------------------*/
