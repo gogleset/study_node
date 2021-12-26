@@ -24,8 +24,8 @@ module.exports = (app) => {
     html += "<h2>Node.js Backend Page</h2>";
 
     // 브라우저에게 전달할 결과코드
-    res.status(200);
-    res.send(html);
+    res.writeHead(200);
+    res.write(html);
     res.end();
   });
 

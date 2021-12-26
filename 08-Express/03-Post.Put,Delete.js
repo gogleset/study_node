@@ -15,7 +15,7 @@ const useragent = require("express-useragent"); //클라이언트의 정보를 �
 const static = require("serve-static"); //다른폴더에서 파일을 찾고, 하위폴더의 내용을 웹상에 노출
 const favicon = require("serve-favicon"); // favicon 처리
 const bodyParser = require("body-parser"); //Post 파라미터 처리
-const methodOverride = require("method-override"); // PUT 파라미터 처리
+const methodOverride = require("method-override"); // PUT,DELETE 파라미터 처리
 
 /*----------------------------------------------------------
  | 2) Express 객체 생성
@@ -97,6 +97,12 @@ app.use((req, res, next) => {
  * static 모듈에 연결된 폴더 안에서 해당 경로를 탐색한다.
  */
 
+// Post파라미터 수신 모듈설정
+// 추가 모듈들 중 UserAgent 를 제외하고 가장먼저 설정해야함.
+// body-parser를 이용해 application/x-www-form-urlencoded 파싱 -> POST 파라미터를 처리한다는 의미.
+// extentded: true -> 지속적 사용
+// extentded: false -> 한번만 사용.
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text()); //TEXT형식의 파라미터 수신가능
 app.use(bodyParser.json()); //JSON형식의 파라미터 수신 가능
@@ -121,7 +127,7 @@ app.use("/", static(public_path));
 /** favicon 설정 */
 app.use(favicon(public_path + "/favicon.png"));
 
-//  라우터(URL 분배기)객체 설정 --> 맨 마지막에 설정
+// 라우터(URL 분배기)객체 설정 --> 맨 마지막에 설정
 const router = express.Router(); //라우터가 됨
 // 라우터를 express에 등록
 app.use("/", router);
@@ -271,18 +277,18 @@ router.route("/product")
     .post((req, res, next) => {
         // <form>상에 수정 상품정보를 입력 후 전송한다(주로 관리자 기능)
         // 저장시에는 일련번호는 정송하지 않으며 저장후 자동으로 발급되는 일련번호를 프론트에게 돌려줘야 한다.
-        const html = "<h1><span style='color:#0066ff'>"+req.query.productNumber+"</span>번 상품 <span style='color:#ff6600'>등록</span>하기</h1>"
+        const html = "<h1><span style='color:#0066ff'>"+req.body.productNumber+"</span>번 상품 <span style='color:#ff6600'>등록</span>하기</h1>"
         res.status(200).send(html);
     })
     .put((req, res, next) => {
         // <form>상에 수정 상품정보를 입력 후 전송한다(주로 관리자 기능)
         // 몇번 상품을 수정할지 식별하기 위해 상품 일련번호가 함께 전송된다.
-        const html = "<h1><span style='color:#0066ff'>"+req.query.productNumber+"</span>번 상품 <span style='color:#ff6600'>수정</span>하기</h1>"
+        const html = "<h1><span style='color:#0066ff'>"+req.body.productNumber+"</span>번 상품 <span style='color:#ff6600'>수정</span>하기</h1>"
         res.status(200).send(html);
     })
     .delete((req, res, next) => {
         // 삭제할 상품의 일련번호 전송.
-        const html = "<h1><span style='color:#0066ff'>"+req.query.productNumber+"</span>번 상품 <span style='color:#ff6600'>삭제</span>하기</h1>"
+        const html = "<h1><span style='color:#0066ff'>"+req.body.productNumber+"</span>번 상품 <span style='color:#ff6600'>삭제</span>하기</h1>"
         res.status(200).send(html);
     });
 

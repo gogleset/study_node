@@ -6,7 +6,6 @@ const logger = require("../helper/LogHelper");
 const util = require("../helper/UtilHelper");
 const fileHelper = require("../helper/FileHelper");
 const config = require("../helper/_config")
-
 // 내장모듈
 const url = require("url");
 const path = require("path");
@@ -40,7 +39,7 @@ const app = express();
  */
 app.use(useragent.express());
 
-// 클라이언트의 접속을 감지
+// 클라이언트의 접속을 감지(req, res는 useragent의 확장객체이다.)
 app.use((req, res, next) => {
   logger.debug("클라이언트가 접속했습니다.");
 
@@ -137,13 +136,15 @@ app.use("/thumb", static(thumb_path));
 app.use(favicon(public_path + "/favicon.png"));
 
 /**쿠키 설정 */
-const cookie_encrypt_key = "helloworld";
-app.use(cookieParser(cookie_encrypt_key));
+app.use(cookieParser(config.secure.cookie_encrypt_key));
 
+
+
+// 세션 설정
 app.use(
   expressSession({
     //암호화 키
-    secret: cookie_encrypt_key,
+    secret: config.secure.session_encrypt_key,
     // 세션을 쿠키 상태로 클라이언트에게 노출시킬지 여부
     resave: false,
     // 세션이 저장되기 전에 기존의 세션을 초기화 상태로 만들지 여부
@@ -221,7 +222,7 @@ const multipart = multer({
 
 /*----------------------------------------------------------
  | 5) 각 URL별 백엔드 기능 정의
- -----------------------------------------------------------*/
+ -------------------------------------------- ---------------*/
 
 app.use(require('./routes/Cookies')(app));
 app.use(require('./routes/FileUpload')(app));
@@ -229,16 +230,13 @@ app.use(require('./routes/Params')(app));
 app.use(require('./routes/SendMail')(app));
 app.use(require('./routes/Session')(app));
 app.use(require('./routes/Setup')(app));
-
-
-
+app.use(require('./routes/movie')(app));
 
 
 /*----------------------------------------------------------
  | 6) 설정한 내용을 기반으로 서버 구동 시작
  -----------------------------------------------------------*/
 // 백엔드를 가동하고 3000번 포트에서 대기
-const port = 3000;
 const ip = util.myip();
 
 app.listen(config.server_port, () => {

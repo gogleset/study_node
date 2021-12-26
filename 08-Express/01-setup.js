@@ -108,19 +108,19 @@ router.route('/page1').get((req, res, next) => {
 });
 
 router.route('/page2').get((req, res, next) => {
-    /**방법(1) - router 기능을 사용(권장) */
+    /**방법(2) - express 기능을 사용 */
     // 브라우저에게 전달할 응답 내용
     let html = '<h1>Page2</h1>';
     html += '<h2>Node.js Backend Page</h2>';
 
-    // 브라우저에게 전달할 결과코드
-    res.status(200);
-    res.send(html);
+  // 브라우저에게 전달할 결과코드
+    res.writeHead(200);
+    res.write(html);
     res.end();
 });
 
 router.route('/page3').get((req, res, next) => {
-    /**방법(1) - router 기능을 사용(권장) */
+    /**방법(3) - router 기능을 사용(권장) */
     // 브라우저에게 전달할 응답 내용
     res.redirect('https://www.naver.com')
 });

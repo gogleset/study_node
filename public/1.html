@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form method="post" action="/movie">
+        <button id="movieButton1" type='submit'>영화데이터가져오기</button>
+        <button id="movieButton2" type='submit'>영화데이터출력</button>
+        <button id="movieButton3" type='submit'>영화데이터삭제</button>
+    </form>
+    <span id="console">
+
+    </span>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let console1 = document.querySelector('#console')
+
+
+
+        // 페이지 열림과 동시에 실행됨
+        const date = new Date();
+        // 하루 전을 계산
+        const b = date.getDate() - 1;
+        date.setDate(b);
+
+        const yy = date.getFullYear();
+        const mm = date.getMonth() + 1;
+        const dd = date.getDate();
+
+        if (mm < 10) { mm = "0" + mm; }
+        if (dd < 10) { dd = "0" + dd; }
+
+        const sendDate = "" + yy + mm + dd;
+        console.log(sendDate);
+
+        document.querySelector("#movieButton1").addEventListener("click", (e) => {
+            e.preventDefault();
+
+            console1.innerHTML = "";
+            (async () => {
+                let data = null;
+                try {
+                    let response = await axios.post('/movie', { date: sendDate });
+                    data = response.data;
+                } catch (e) {
+                    console.log(e);
+                }
+                
+                console1.innerHTML = data;
+            })()
+        });
+
+        document.querySelector("#movieButton2").addEventListener("click", (e) => {
+            e.preventDefault();
+
+            console1.innerHTML = "";
+            (async () => {
+                let data = null;
+                try {
+                    let response = await axios.get('/movie');
+                    data = JSON.stringify(response.data);
+                    console.log(data);
+                } catch (e) {
+                    console.log(e);
+                }
+                console1.innerHTML = data;
+            })()
+        });
+
+        document.querySelector("#movieButton3").addEventListener("click", (e) => {
+            e.preventDefault();
+
+            console1.innerHTML = "";
+            (async () => {
+                let data = null;
+                try {
+                    let response = await axios.delete('/movie');
+                    data = response.data;
+                } catch (e) {
+                    console.log(e);
+                }
+
+                console1.innerHTML = data;
+            })()
+        });
+    </script>
+</body>
+
+</html>

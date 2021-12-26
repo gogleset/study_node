@@ -53,5 +53,9 @@ module.exports = {
     thumbnail: { 
         sizes: [640, 750, 1020],
         dir: path.join(__dirname, '../_files/thumb')
+    },
+
+    movie : {
+        dir: path.join(__dirname, '../_files/movie')
     }
 };
