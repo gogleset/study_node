@@ -7,7 +7,6 @@ module.exports = (app) => {
   const fs = require("fs"); // FileSystem 모듈 참조
   const target = "_files/movie/movie.txt"; //저장할 파일의 경로()
   let content = null; //저장할 내용
-  
 
   router
     .route("/movie")
@@ -21,7 +20,7 @@ module.exports = (app) => {
         //이 파일을 다 읽기 전까지는 프로그램이 대기상태임.
         // 그러므로 대용량 처리에는 적합하지 않음
         let data = fs.readFileSync(target, "utf8");
-        response = data
+        response = data;
         // 읽어들인 데이터를 출력
         logger.debug(response);
 
@@ -81,8 +80,7 @@ module.exports = (app) => {
           // 파일저장이 완료된 후에나 메시지가 표시된다.
           console.log(target + "파일에 데이터쓰기 및 퍼미션 설정 완료.");
           msg = "<h1>데이터 저장 및 파일 쓰기 완료</h1>";
-        } 
-        else {
+        } else {
           // 3) 파일이 존재할 경우 파일 삭제
           fs.unlinkSync(target);
           console.log(target + "파일삭제완료");
@@ -103,18 +101,56 @@ module.exports = (app) => {
       let response = null;
       const isExists = fs.existsSync(target); //파일의 존재 여부 검사(true, false 리턴)
 
-      if (isExists){
-          // 3) 파일이 존재할 경우 파일 삭제
-          fs.unlinkSync(target);
-          logger.debug(target + "파일삭제완료")
-          response = "<h1>파일삭제완료</h1>"
+      if (isExists) {
+        // 3) 파일이 존재할 경우 파일 삭제
+        fs.unlinkSync(target);
+        logger.debug(target + "파일삭제완료");
+        response = "<h1>파일삭제완료</h1>";
 
-          res.status(200).send(response);
+        res.status(200).send(response);
       } else {
-        response = "<h1>파일이 없습니다</h1>"
-        res.status(200).send(response)
+        response = "<h1>파일이 없습니다</h1>";
+        res.status(200).send(response);
       }
     });
+
+  router.route("/today_covid19/:region").get((req, res, next) => {
+    const url = "http://itpaper.co.kr/demo/covid19/now.php";
+    for (key in req.params) {
+      const str =
+        "프론트엔드로부터 전달받은 변수 ::: " + key + "=" + req.params[key];
+      logger.debug(str);
+    }
+    let q = req.params.region;
+    console.log(q);
+
+    (async () => {
+      let json = null;
+      let data = null;
+
+      let confirmed = null;
+      try {
+        json = await axios.get(url);
+        data = json.data.state;
+        console.log(data);
+      } catch (e) {
+        console.log(e);
+      }
+      data.map((v, i) => {
+        console.log(v.region);
+        if (v.region == q) {
+          confirmed = v.confirmed - v.confirmed_prev;
+        }
+      });
+
+      console.log("확진자 : " + confirmed);
+
+      response = { "확진" : confirmed };
+      res.status(200).send(response);
+    })();
+  });
+
+  
 
   return router;
 };

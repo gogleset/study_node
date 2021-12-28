@@ -3,7 +3,7 @@
  */
 
 // 1) 필요한 패키지 참조하기
-const logger = require('../helper/LogHelper')
+const logger = require('../helper/LogHelper');
 const schedule = require('node-schedule');
 
 // 2) 매 분마다 수행

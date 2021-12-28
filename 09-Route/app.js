@@ -201,7 +201,7 @@ const multipart = multer({
   // 용량, 최대 업로드 파일 수 제한 설정
   limts: {
     files: 5,
-    filesize: 1024 * 1024 * 20,
+    filesize: 1024 * 1024 * 20
   },
 
   /** 업로드 될 파일의 확장자 제한 */
@@ -231,6 +231,7 @@ app.use(require('./routes/SendMail')(app));
 app.use(require('./routes/Session')(app));
 app.use(require('./routes/Setup')(app));
 app.use(require('./routes/movie')(app));
+
 
 
 /*----------------------------------------------------------
