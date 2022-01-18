@@ -26,6 +26,7 @@ const mysql2 = require("mysql2/promise");
     const sql = "SELECT deptno, dname, loc FROM department WHERE deptno <= ?";
     const input_data = [202];
     const [result1] = await dbcon.query(sql, input_data);
+    console.log(result1);
 
     result1.map((v, i) => {
       console.log("%d, %s, %s", v.deptno, v.dname, v.loc);
