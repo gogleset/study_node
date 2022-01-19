@@ -5,7 +5,8 @@
 const logger = require("../helper/LogHelper");
 const util = require("../helper/UtilHelper");
 const fileHelper = require("../helper/FileHelper");
-const config = require("../helper/_config")
+const config = require("../helper/_config");
+const webHelper = require("../helper/WebHelper");
 // 내장모듈
 const url = require("url");
 const path = require("path");
@@ -23,6 +24,7 @@ const multer = require("multer"); //업로드 모듈, 생성은 라우터 다음
 const nodemailer = require("nodemailer"); //메일발송 --> app.use()로 추가설정 필요없음, 자체가 함수
 const thumbnail = require("node-thumbnail").thumb; //썸네일 이미지 생성모듈
 
+const test = require("./controllers/test"); //객체 확장예제
 /*----------------------------------------------------------
  | 2) Express 객체 생성
  -----------------------------------------------------------*/
@@ -119,26 +121,8 @@ app.use(methodOverride("_method"));
 
 // HTML,CSS,IMG,JS 등의 정적 파일을 URL에 노출시킬 폴더 연결
 
-//  public 폴더 안에있는 모든 html파일을 실행시켜줌
-const public_path = path.join(__dirname, "../public");
-//  static = 지정된 폴더에서 파일을 찾음 하위 폴더를 웹상에 노출시키는게 가능함
-const upload_path = path.join(__dirname, "../_files/upload");
-
-const thumb_path = path.join(__dirname, "../_files/thumb");
-
-app.use("/", static(public_path));
-// --> upload 폴더의 웹 상의 위치 : http://아이피:포트번호/upload
-app.use("/upload", static(upload_path));
-// --> 썸네일 이미지가 생성될 폴더의 웹 상의 위치 : http://아이피:포트번호/thumb
-app.use("/thumb", static(thumb_path));
-
-/** favicon 설정 */
-app.use(favicon(public_path + "/favicon.png"));
-
 /**쿠키 설정 */
 app.use(cookieParser(config.secure.cookie_encrypt_key));
-
-
 
 // 세션 설정
 app.use(
@@ -151,85 +135,57 @@ app.use(
     saveUninitialized: false,
   })
 );
+// 테스트 파일(익스프레스 확장 예제)
+// app.use(test());
 
+/**req, res 객체의 기능을 확장하는 모듈 */
+app.use(webHelper());
+
+// HTML,CSS,IMG,JS 등의 정적 파일을 URL에 노출시킬 폴더 연결
+app.use("/", static(config.public_path));
+// --> upload 폴더의 웹 상의 위치 : http://아이피:포트번호/upload
+app.use("/upload", static(config.upload.dir));
+// --> 썸네일 이미지가 생성될 폴더의 웹 상의 위치 : http://아이피:포트번호/thumb
+app.use("/thumb", static(config.thumbnail.dir));
+
+/** favicon 설정 */
+app.use(favicon(config.favicon_path));
 //  라우터(URL 분배기)객체 설정 --> 맨 마지막에 설정
 const router = express.Router(); //라우터가 됨
 // 라우터를 express에 등록
 app.use("/", router);
-
-/** multer 객체 생성 --> 파일 제한: 5개, 20M */
-const multipart = multer({
-  storage: multer.diskStorage({
-    /**업로드 된 파일이 저장될 디렉토리 설정 */
-    // req는 요청정보, file은 최종적으로 업로드된 결과 데이터가 저장되어 있을 객체
-    destination: (req, file, callback) => {
-      // 폴더 생성
-      fileHelper.mkdir(upload_path);
-      fileHelper.mkdir(thumb_path);
-      console.debug(file);
-
-      // 업로드 정보에 백엔드의 업로드 파일 저장폴더 위치를 추가한다.
-      file.dir = upload_path.replace(/\\/gi, "/");
-      // file.dir = thumb_path.replace(/\\/gi, "/");
-
-      // multer 객체에게 업로드 경로를 전달
-      callback(null, upload_path);
-    },
-    /**업로드 된 파일이 저장될 파일명 설정 */
-    // file.originalname 변수에 파일이름이 저장되어 있다. -> ex)helloworld.png
-    filename: (req, file, callback) => {
-      // 파일의 확장자만 추출 --> .png
-      const extName = path.extname(file.originalname);
-      // 파일이 저장될 이름(현재시각)
-      const saveName = new Date().getTime().toString() + extName.toLowerCase();
-      // 업로드 정보에 백엔드의 업로드 파일 이름을 추가한다.
-      file.savename = saveName;
-      file.path = path.join(file.dir, saveName);
-      // 업로드 정보에 파일에 접근할 수 있는 URL값 추가
-      file.url = path.join("/upload", saveName).replace(/\\/gi, "/");
-
-      // 구성된 정보를 req객체에 추가
-      // req.file이 배열이라면?
-      if (req.file instanceof Array) {
-        req.file.push(file);
-      } else {
-        req.file = file;
-      }
-      callback(null, saveName);
-    },
-  }),
-  // 용량, 최대 업로드 파일 수 제한 설정
-  limts: {
-    files: 5,
-    filesize: 1024 * 1024 * 20
-  },
-
-  /** 업로드 될 파일의 확장자 제한 */
-  fileFilter: (req, file, callback) => {
-    // 파일의 종류 얻기
-    let mimetype = file.mimetype;
-
-    // 파일 종류 문자열에 "image/"가 포함되어 있지 않은 경우
-    if (mimetype.indexOf("image/") == -1) {
-      const err = new Error();
-      err.result_code = 500;
-      err.result_msg = "이미지 파일만 업로드 가능합니다.";
-      return callback(err);
-    }
-    callback(null, true);
-  },
-});
-
 /*----------------------------------------------------------
  | 5) 각 URL별 백엔드 기능 정의
  -------------------------------------------- ---------------*/
 
-
-app.use(require('./controllers/Department')(app));
+app.use(require("./controllers/Department")(app));
 app.use(require('./controllers/Student')(app));
 app.use(require('./controllers/Professor')(app));
 
+// 런타임 에러가 발생한 경우에 대한 일괄처리
+app.use((err, req, res, next) => {
+  logger.error(err);
 
+  let status = 500;
+  let msg = null;
+
+  if (!isNaN(err.message)) {
+    status = parseInt(err.message);
+  }
+
+  switch (status) {
+    case 400:
+      res.sendBadRequest();
+      break;
+    default:
+      res.sendRuntimeError();
+      break;
+  }
+});
+// 앞에서 정의하지 않은 그 밖의 URL에 대한 일괄 처리
+app.use("*", (req, res, next) => {
+  res.sendNotFound();
+});
 
 /*----------------------------------------------------------
  | 6) 설정한 내용을 기반으로 서버 구동 시작

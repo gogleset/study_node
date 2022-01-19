@@ -1,1 +1,1 @@
-../helper/LogHelper
+app.use(require('./controllers/Student')(app));

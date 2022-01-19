@@ -15,7 +15,9 @@ module.exports = (app) => {
     // 데이터 조회 결과가 저장될 빈 변수
 
     let json = null;
-
+    
+    // 객체확장예제
+    // req.asdasdasd();
     try {
       // 데이터베이스 접속
       dbcon = await mysql2.createConnection(config.database);
@@ -28,38 +30,24 @@ module.exports = (app) => {
       // 조회 결과를 미리 준비한 변수에 저장함
       json = result;
     } catch (e) {
+      return next(e);
+    } finally {
       dbcon.end();
-      logger.error(e);
-
-      // 400 Bad Request => 잘못된 요청
-      return res.status(500).send({
-        rt: 500,
-        rtmsg: "요청을 처리하는데 실패했습니다.",
-        pubdate: new Date().toISOString(),
-      });
     }
 
-    dbcon.end();
-
     // 모든 처리에 성공했으므로 정상 조회 결과를 구성
-    res.status(200).send({
-      rt: 200,
-      rtmsg: "OK",
-      item: json,
-      pubdate: new Date().toISOString(),
-    });
+    res.sendJson({'item': json});
   });
 
   // 특정 항목에 대한 상세 조회
   router.get("/department/:deptno", async (req, res, next) => {
-    const deptno = req.params.deptno;
+    // req.get함수에 'deptno'라는 키를 넘겨줌
+    const deptno = req.get('deptno');
+    console.log(deptno);
 
-    if (deptno === undefined) {
+    if (deptno == null) {
       // 400 Bad Request -> 잘못된 요청
-      return res.status(400).send({
-        rt: 400,
-        rtmsg: "필수 파라미터가 없습니다.",
-      });
+      return next(new Error(400));
     }
 
     // 데이터 조회 결과가 저장될 빈 변수
@@ -76,38 +64,22 @@ module.exports = (app) => {
       // 조회 결과를 미리 준비한 변수에 저장함
       json = result;
     } catch (e) {
+      return next(e);
+    } finally {
       dbcon.end();
-      logger.error(e);
-
-      // 400 Bad Request -> 잘못된 요청
-      return res.status(500).send({
-        rt: 500,
-        rtmsg: "요청을 처리하는데 실패했습니다.",
-        pubdate: new Date().toISOString(),
-      });
     }
-    dbcon.end();
-
     // 모든 처리에 성공했으므로 정상 조회 결과 구성
-    res.status(200).send({
-      rt: 200,
-      rtmsg: "OK",
-      item: json,
-      pubdate: new Date().toISOString(),
-    });
+    res.sendJson({'item': json});
   });
   //   데이터 추가 --> Create(INSERT)
   router.post("/department", async (req, res, next) => {
     //   저장을 위한 파라미터 입력받기
-    const dname = req.body.dname;
-    const loc = req.body.loc;
+    const dname = req.post('dname');
+    const loc = req.post('loc');
 
-    if (dname === undefined || loc === undefined) {
+    if (dname === null) {
       // 400 Bad Request -> 잘못된 요청
-      return res.status(400).send({
-        rt: 500,
-        rtmsg: "필수 파라미터가 없습니다..",
-      });
+      return next(new Error(400));
     }
 
     // 데이터 저장하기
@@ -131,39 +103,24 @@ module.exports = (app) => {
       // 조회 결과를 미리 준비한 변수에 저장함
       json = result2;
     } catch (e) {
+      return next(e);
+    } finally {
       dbcon.end();
-      logger.error(e);
-
-      // 500 server Error => 잘못된 요청
-      return res.status(500).send({
-        rt: 500,
-        rtmsg: "요청을 처리하는데 실패했습니다.",
-        pubdate: new Date().toISOString(),
-      });
     }
-    dbcon.end();
 
     // 모든 처리에 성공했으므로 정상 조회 결과 구성
-    res.status(200).send({
-      rt: 200,
-      rtmsg: "OK",
-      item: json,
-      pubdate: new Date().toISOString(),
-    });
+    res.sendJson({'item': json});
   });
 
   //   데이터 수정 --> UPDATE
   router.put("/department/:deptno", async (req, res, next) => {
-    const deptno = req.params.deptno;
-    const dname = req.body.dname;
-    const loc = req.body.loc;
+    const deptno = req.get('deptno');
+    const dname = req.post('dname');
+    const loc = req.post('loc');
 
-    if (deptno == undefined || dname == undefined) {
+    if (deptno === null || dname === null) {
       // 400 Bad Request -> 잘못된 요청
-      return res.status(400).send({
-        rt: 400,
-        rtmsg: "필수 파라미터가 없습니다.",
-      });
+      return next(new Error(400));
     }
 
     // 데이터 수정하기
@@ -192,40 +149,25 @@ module.exports = (app) => {
       // 조회 결과를 미리 준비한 변수에 저장함
       json = result2;
     } catch (e) {
+      return next(e);
+    } finally {
       dbcon.end();
-      logger.error(e.message);
-
-      // 500 server Error => 잘못된 요청
-      return res.status(500).send({
-        rt: 500,
-        rtmsg: "요청을 처리하는데 실패했습니다.",
-        pubdate: new Date().toISOString(),
-      });
     }
-
-    dbcon.end();
 
     // 모든 처리에 성공했으므로 정상 조회 결과 구성
-    res.status(200).send({
-      rt: 200,
-      rtmsg: "OK",
-      item: json,
-      pubdate: new Date().toISOString(),
-    });
+    res.sendJson({'item': json});
   });
 
-  //   데이터 삭제 --> UPDATE
+  //   데이터 삭제 --> DELETE
   router.delete("/department/:deptno", async (req, res, next) => {
-    const deptno = req.params.deptno;
+    const deptno = req.delete('deptno');
 
-    if (deptno === undefined) {
+    if (deptno === null) {
       //400 Bad Request -> 잘못된 요청
-      return res.status(404).send({
-        rt: 400,
-        rtmsg: "필수 파라미터가 없습니다.",
-      });
+      return next(new Error(400));
     }
 
+      // 데이터 삭제하기
     try {
       // 데이터 베이스접속
       dbcon = await mysql2.createConnection(config.database);
@@ -246,25 +188,13 @@ module.exports = (app) => {
         throw new Error("삭제된 데이터가 없습니다.");
       }
     } catch (e) {
+      return next(e);
+    } finally {
       dbcon.end();
-      logger.error(e.message);
-
-      // 500 server Error => 잘못된 요청
-      return res.status(500).send({
-        rt: 500,
-        rtmsg: "요청을 처리하는데 실패했습니다.",
-        pubdate: new Date().toISOString(),
-      });
     }
 
-    dbcon.end();
-
     // 모든 처리에 성공했으므로 정상 조회 결과 구성
-    res.status(200).send({
-      rt: 200,
-      rtmsg: "OK",
-      pubdate: new Date().toISOString(),
-    });
+    res.sendJson();
   });
   return router;
 };
