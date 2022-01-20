@@ -1,1 +1,1 @@
-app.use(require('./controllers/Student')(app));
+app.use(require('./controllers/Member')(app));

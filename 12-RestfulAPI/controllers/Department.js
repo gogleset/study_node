@@ -5,6 +5,7 @@ const config = require("../../helper/_config");
 const logger = require("../../helper/LogHelper");
 const router = require("express").Router();
 const mysql2 = require("mysql2/promise");
+const regexHelper = require("../../helper/RegexHelper")
 
 // 라우팅 정의 부분
 module.exports = (app) => {
@@ -71,15 +72,18 @@ module.exports = (app) => {
     // 모든 처리에 성공했으므로 정상 조회 결과 구성
     res.sendJson({'item': json});
   });
+
   //   데이터 추가 --> Create(INSERT)
   router.post("/department", async (req, res, next) => {
     //   저장을 위한 파라미터 입력받기
     const dname = req.post('dname');
     const loc = req.post('loc');
 
-    if (dname === null) {
-      // 400 Bad Request -> 잘못된 요청
-      return next(new Error(400));
+    try{
+      regexHelper.value(dname, '학과이름이 없습니다.');
+      regexHelper.maxLength(dname, 10,  '학과이름이 너무 깁니다.')
+    }catch(err){
+      return next(err);
     }
 
     // 데이터 저장하기
@@ -160,7 +164,7 @@ module.exports = (app) => {
 
   //   데이터 삭제 --> DELETE
   router.delete("/department/:deptno", async (req, res, next) => {
-    const deptno = req.delete('deptno');
+    const deptno = req.get('deptno');
 
     if (deptno === null) {
       //400 Bad Request -> 잘못된 요청

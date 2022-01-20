@@ -1,0 +1,162 @@
+@charset "utf-8";
+
+.form-horizontal{
+    width: 100%;
+    height: 950px;
+    background-color: rgb(245, 246, 247);
+    margin: 0 auto;
+    padding-top: 10px;
+}
+.form-group{
+    width: 450px;
+
+    margin: auto;
+    margin-bottom: 30px;
+}
+.col-md-2{
+    display: block;
+    font-size:10px;
+    
+    padding-top: 5px;
+    margin-bottom: 4px;
+    text-indent: 50px;
+
+    font-weight: bold;
+}
+
+.logo{
+    width: 200px;
+    height: 40px;
+    margin: 0 auto;
+    margin-bottom:10px;
+    
+}
+
+.logo a{
+    display: block;
+    
+    width: 200px;
+    height: 40px;
+    
+}
+.logo-img{
+    width: 200px;
+    height: 40px;
+    margin: 0 auto;
+    background-image: url('../2.png');
+    background-size: cover;
+}
+
+
+
+
+.form-control{
+    display: block;
+    width: 347px;
+    height:35px;
+    margin: 0 auto;
+    border: 1px solid rgb(221, 221, 221);   
+    text-align: left;
+    padding-left: 5px;
+}
+
+.option{
+    display: block;
+    width: 355px;
+    margin: auto;
+    border: 1px solid rgb(221, 221, 221);
+    padding:5px;
+}
+
+.birthday{
+    display: block;
+    width: 355px;
+    margin: 0 auto;
+    
+}
+
+.user_birth{
+    width: 25%;
+    height: 35px;
+    margin-right: 5px;
+    border: 1px solid rgb(221, 221, 221);
+}
+
+.user_birth1{
+    text-indent: 3px;
+}
+.user_birth_option{
+    width: 40%;
+    margin-right: 5px;
+
+}
+.user_day{
+    width: 22.1%;
+    height: 35px;
+    margin: 0px;
+}
+
+.user_birth::placeholder{
+    text-align: left;
+    font-size: 10px;
+}
+.user_day::placeholder{
+    text-align: left;
+    font-size: 10px;
+}
+.user_email::placeholder{
+    font-size: 10px;
+}
+.user_cellphone::placeholder{
+    font-size:10px;
+}
+
+.text-center{
+    display: block;
+    text-align: center;
+}
+
+.option{
+    text-align: left;
+    font-size: 10px;
+    height: 35px;
+}
+.cellphone_group{
+    width: 401px;
+    height: 100px;
+
+}
+.user_cellphone{
+    width:65%;
+    height:35px;
+    margin-right: 5px;
+    margin-left: 23px;
+}
+.user_cellphone_button{
+    width: 20%;
+    height: 38px;
+    font-size: 5px;
+    padding: 1px;
+    border: 1px solid rgb(234, 234, 234);
+    background-color: rgb(90, 196, 95);
+    color: white;
+    
+}
+.user_cellphone_output{
+    width:345px;
+    height:38px;
+    margin-top: 10px;
+    font-size:10px;
+    background-color: rgb(245, 246, 247);
+    border: 1px solid rgb(221, 221, 221);
+}
+.btn{
+    width:355px;
+    height: 45px;
+    background-color: rgb(90, 196, 95);
+    color: white;
+    border: 1px solid rgb(234, 234, 234);
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+}

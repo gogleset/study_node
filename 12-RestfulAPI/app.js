@@ -7,6 +7,9 @@ const util = require("../helper/UtilHelper");
 const fileHelper = require("../helper/FileHelper");
 const config = require("../helper/_config");
 const webHelper = require("../helper/WebHelper");
+const BadRequestException = require("../exceptions/BadRequestException");
+const PageNotFoundException = require("../exceptions/PageNotFoundException");
+const RuntimeException = require("../exceptions/RuntimeException");
 // 내장모듈
 const url = require("url");
 const path = require("path");
@@ -161,30 +164,22 @@ app.use("/", router);
 app.use(require("./controllers/Department")(app));
 app.use(require('./controllers/Student')(app));
 app.use(require('./controllers/Professor')(app));
-
+app.use(require('./controllers/Member')(app));
 // 런타임 에러가 발생한 경우에 대한 일괄처리
 app.use((err, req, res, next) => {
-  logger.error(err);
-
-  let status = 500;
-  let msg = null;
-
-  if (!isNaN(err.message)) {
-    status = parseInt(err.message);
-  }
-
-  switch (status) {
-    case 400:
-      res.sendBadRequest();
-      break;
-    default:
-      res.sendRuntimeError();
-      break;
+  // 에러 객체를 만들 때 생성자 파라미터로 전달한 에러메시지
+  if(err instanceof BadRequestException){
+    console.log("app.use로 넘어온 err 객체=%s",err);
+    res.sendError(err)
+  } else {
+    console.log(err);
+    res.sendError(new RuntimeException(err.message));
   }
 });
 // 앞에서 정의하지 않은 그 밖의 URL에 대한 일괄 처리
 app.use("*", (req, res, next) => {
-  res.sendNotFound();
+  const err = new PageNotFoundException();
+  res.sendError(err);
 });
 
 /*----------------------------------------------------------
