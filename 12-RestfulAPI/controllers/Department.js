@@ -6,6 +6,7 @@ const logger = require("../../helper/LogHelper");
 const router = require("express").Router();
 const mysql2 = require("mysql2/promise");
 const regexHelper = require("../../helper/RegexHelper")
+const util = require("../../helper/UtilHelper");
 
 // 라우팅 정의 부분
 module.exports = (app) => {
@@ -13,9 +14,18 @@ module.exports = (app) => {
 
   // 전체 목록 조회 --> Read(SELECT)
   router.get("/department", async (req, res, next) => {
-    // 데이터 조회 결과가 저장될 빈 변수
+    // 검색어 파라미터 받기 -> 검색어가 없을 경우 전체 목록 조회이므로 유효성검사 안함
+    const query = req.get('query');
 
+    // 현재 페이지 번호 받기(기본값은 1)
+    const page = req.get('page', 1);
+
+    // 한 페이지에 보여질 목록 수 받기 (기본값은 10, 최소 10, 최대 30)
+    const rows = req.get('rows', 10);
+
+    // 데이터 조회 결과가 저장될 빈 변수
     let json = null;
+    let pagenation = null;
     
     // 객체확장예제
     // req.asdasdasd();
@@ -25,11 +35,41 @@ module.exports = (app) => {
       await dbcon.connect();
 
       // 데이터 조회
-      const sql = "SELECT deptno, dname, loc FROM department";
-      const [result] = await dbcon.query(sql);
+      let sql1= "SELECT deptno, dname, loc FROM department";
+
+      // SQL문에 설정할 치환값
+      let args1 = [];
+
+      if(query != null){
+        sql1 += " WHERE dname LIKE concat('%', ?, '%')";
+        args1.push(query);
+      }
+      const [result1] = await dbcon.query(sql1, args1);
+      console.log([result1]);
+      const totalCount = result1[0].cnt;
+
+      // 페이지번호 정보를 계산한다.
+      pagenation = util.pagenation(totalCount, page, rows);
+      logger.debug(JSON.stringify(pagenation));
+
+      // 데이터 조회
+      let sql2 = 'SELECT deptno, dname, loc FROM department';
+
+      // SQL문에 설정할 치환값
+      let args2 = [];
+
+      if(query != null){
+        sql2 += " WHERE dname LIKE concat('%', ?, '%')";
+        args2.push(query);
+      }
+      sql2 += ' LIMIT ?, ?';
+      args2.push(pagenation.offset);
+      args2.push(pagenation.listCount);
+
+      const [result2] = await dbcon.query(sql2, args2);
 
       // 조회 결과를 미리 준비한 변수에 저장함
-      json = result;
+      json = result2;
     } catch (e) {
       return next(e);
     } finally {

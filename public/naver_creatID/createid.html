@@ -352,11 +352,6 @@
     <script>
         document.querySelector("#join_form").addEventListener("submit", e => {
             e.preventDefault();
-
-
-            const b = {
-            }
-
             const c = new Createid();
 
 
@@ -400,7 +395,6 @@
             // 핸드폰
             if (!c.value("#user_cellphone", "핸드폰 번호를 입력해주세요")) { return false }
             if (!c.cellphone("#user_cellphone", "핸드폰 번호 형식에 맞지 않습니다")) { return false }
-
 
             const userid = document.querySelector("#user_id").value;
             const password = document.querySelector("#user_pw").value;

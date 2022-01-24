@@ -25,8 +25,13 @@ module.exports = () => {
             console.log("GET 방식이 아닌 경우 값은 = " + value);
         }
 
+        if(value === undefined){
+            value = def;
+        }
+
+        
         // 빈 문자열이거나 공백인 경우 잘라내기
-        if(value !== null){
+        if(value !== null && typeof value == 'string'){
             value = value.trim();
 
             if(value.length === 0){
@@ -34,6 +39,7 @@ module.exports = () => {
                 value = def;
             }
         }
+
         logger.debug('[HTTP %s Params %s = %s', method, key, value);
         return value;
     };
