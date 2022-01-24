@@ -21,7 +21,7 @@ module.exports = (app) => {
     const page = req.get('page', 1);
 
     // 한 페이지에 보여질 목록 수 받기 (기본값은 10, 최소 10, 최대 30)
-    const rows = req.get('rows', 10);
+    const rows = req.get('rows', 5);
 
     // 데이터 조회 결과가 저장될 빈 변수
     let json = null;
@@ -35,7 +35,7 @@ module.exports = (app) => {
       await dbcon.connect();
 
       // 데이터 조회
-      let sql1= "SELECT deptno, dname, loc FROM department";
+      let sql1= "SELECT COUNT(*) AS cnt FROM department";
 
       // SQL문에 설정할 치환값
       let args1 = [];
@@ -77,7 +77,7 @@ module.exports = (app) => {
     }
 
     // 모든 처리에 성공했으므로 정상 조회 결과를 구성
-    res.sendJson({'item': json});
+    res.sendJson({'pagenation': pagenation,'item': json});
   });
 
   // 특정 항목에 대한 상세 조회
