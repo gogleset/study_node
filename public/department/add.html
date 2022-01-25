@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학과관리 ::: MySchool</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <!-- header -->
+    <div data-include="/department/inc/header.html"></div>
+
+    <!-- body -->
+    <div class="container">
+        <div class="page-header">
+            <h1>학과추가</h1>
+        </div>
+        <form name="form" id="department-form" action="" class="form-horizontal">
+            <div class="form-group">
+                <label for="dname" class="col-md-2 control-label"> <span class="text-danger">*</span> 학과이름 </label>
+                <div class="col-md-10">
+                    <input type="text" name="dname" id="dname" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="loc" class="col-md-2 control-label"> 학과위치</label>
+                <div class="col-md-10">
+                    <input type="text" name="loc" id="loc" class="form-control">
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <button class="btn btn-primary" type="submit">저장하기</button>
+                <button class="btn btn-warning" type="reset">다시작성</button>
+            </div>
+        </form>
+
+    </div>
+
+    <!-- footer -->
+    <div data-include="/department/inc/footer.html"></div>
+
+
+    <!-- script -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./assets/js/include.js"></script>
+
+    <script>
+        // 수정완료후 submit 이벤트가 발생한 경우
+        document.querySelector("#department-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // 입력값 받아오기
+            const dname = document.getElementById('dname').value;
+            const loc = document.getElementById('loc').value;
+
+            let json = null;
+
+            try {
+                // UPDATE 기능의 핵심은 WHERE 절에 사용할 PK값을 유지하는데 있다!!!!!!!!
+                const response = await axios.post('/department', {
+                    dname: dname,
+                    loc: loc,
+                });
+                json = response.data;
+            } catch (e) {
+                alert(e.response.data.rtmsg);
+                return;
+            }
+
+            if (json != null) {
+                // 새로 생성된 데이터의 PK를 상세페이지로 전달하여 저장결과를 확인해야한다.
+                window.location = "/department/view.html?deptno=" + json.item[0].deptno;
+            }
+        });
+    </script>
+</body>
+
+</html>

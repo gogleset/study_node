@@ -5,7 +5,7 @@ const config = require("../../helper/_config");
 const logger = require("../../helper/LogHelper");
 const router = require("express").Router();
 const mysql2 = require("mysql2/promise");
-const regexHelper = require("../../helper/RegexHelper")
+const regexHelper = require("../../helper/RegexHelper");
 const util = require("../../helper/UtilHelper");
 
 // 라우팅 정의 부분
@@ -21,7 +21,7 @@ module.exports = (app) => {
     const page = req.get('page', 1);
 
     // 한 페이지에 보여질 목록 수 받기 (기본값은 10, 최소 10, 최대 30)
-    const rows = req.get('rows', 5);
+    const rows = req.get('rows', 10);
 
     // 데이터 조회 결과가 저장될 빈 변수
     let json = null;
