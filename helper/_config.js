@@ -65,5 +65,23 @@ module.exports = {
     user: "root", // 접근권한 아이디(root=관리자)
     password: "Chlwls@213468", //설치시 입력한 비밀번호
     database: "myschool", //사용할 데이터베이스 이름
+    insecureAuth: true,
+
+    // -- 세션
+    // 세션 만료시간.(지정된 시간동안 페이지 이동이 없을 경우 로그아웃)
+    checkExpirationInterval: 900000,
+    // 최대 유효 세션 수 (최대 동접자 수)
+    expiration: 86400000,
+    // DB테이블이 없을 경우 자동 생성
+    createDatabaseTable: true,
+    // DB테이블 구조
+    schema: {
+      tableName: "sessions",
+      columnNames: {
+        session_id: "session_id",
+        expires: "expires",
+        data: "data",
+      },
+    },
   },
 };

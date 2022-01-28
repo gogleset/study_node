@@ -23,6 +23,7 @@ const bodyParser = require("body-parser"); //Post 파라미터 처리
 const methodOverride = require("method-override"); // PUT 파라미터 처리
 const cookieParser = require("cookie-parser"); //Cookie 처리
 const expressSession = require("express-session"); //Session 처리
+const ExpressMysqlSession = require("express-mysql-session")(expressSession); // DB세션 처리
 const multer = require("multer"); //업로드 모듈, 생성은 라우터 다음에 들어감.(유의!)
 const nodemailer = require("nodemailer"); //메일발송 --> app.use()로 추가설정 필요없음, 자체가 함수
 const thumbnail = require("node-thumbnail").thumb; //썸네일 이미지 생성모듈
@@ -107,6 +108,16 @@ app.use((req, res, next) => {
  * "http://아이피:포트번호"이후의 경로가 router에 등록되지 않은 경로라면
  * static 모듈에 연결된 폴더 안에서 해당 경로를 탐색한다.
  */
+
+// DB세션 사용 처리
+app.use(
+  expressSession({
+    secret: config.secure.session_encrypt_key,
+    resave: false,
+    saveUninitialized: false,
+    store: new ExpressMysqlSession(config.database)
+  })
+)
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text()); //TEXT형식의 파라미터 수신가능

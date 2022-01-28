@@ -79,7 +79,69 @@ module.exports = (app) => {
     // 모든 처리에 성공했으므로 정상 조회 결과를 구성
     res.sendJson({'pagenation': pagenation,'item': json});
   });
+  router.get("/department/all", async (req, res, next) => {
+    // 데이터 조회 결과가 저장될 빈 변수
+    let json = null;
+    
+    // 객체확장예제
+    // req.asdasdasd();
+    try {
+      // 데이터베이스 접속
+      dbcon = await mysql2.createConnection(config.database);
+      await dbcon.connect();
 
+      // 데이터 조회
+      let sql = 'SELECT deptno, dname, loc FROM department';
+
+      const [result] = await dbcon.query(sql);
+
+      // 조회 결과를 미리 준비한 변수에 저장함
+      json = result;
+    } catch (e) {
+      return next(e);
+    } finally {
+      dbcon.end();
+    }
+
+    // 모든 처리에 성공했으므로 정상 조회 결과를 구성
+    res.sendJson({'item': json});
+  });
+  router.post("/department/professor_name", async (req, res, next) => {
+    // 검색어 파라미터 받기 -> 검색어가 없을 경우 전체 목록 조회이므로 유효성검사 안함
+    const value = req.post('value');
+    console.log(value);
+
+    // 데이터 조회 결과가 저장될 빈 변수
+    let json = null;
+ 
+    
+    // 객체확장예제
+    // req.asdasdasd();
+    try {
+      // 데이터베이스 접속
+      dbcon = await mysql2.createConnection(config.database);
+      await dbcon.connect();
+
+      // 데이터 조회
+      let sql1= "select p.name from professor p inner join department d on d.deptno = p.deptno where d.deptno = ?";
+
+      // if(query != null){
+      //   sql1 += " WHERE dname LIKE concat('%', ?, '%')";
+      //   args1.push(query);
+      // }
+      const [result1] = await dbcon.query(sql1, value);
+      console.log([result1]);
+      // 조회 결과를 미리 준비한 변수에 저장함
+      json = result1;
+    } catch (e) {
+      return next(e);
+    } finally {
+      dbcon.end();
+    }
+
+    // 모든 처리에 성공했으므로 정상 조회 결과를 구성
+    res.sendJson({'item': json});
+  });
   // 특정 항목에 대한 상세 조회
   router.get("/department/:deptno", async (req, res, next) => {
     // req.get함수에 'deptno'라는 키를 넘겨줌

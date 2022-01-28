@@ -50,30 +50,29 @@ module.exports.pagenation = function(totalCount=0, nowPage=1, listCount=10, grou
     groupCount = isNaN(groupCount) ? 5 : parseInt(groupCount); 
 
     // 전체 페이지 수
-    var totalPage = parseInt(((totalCount - 1) / listCount)) + 1 ;
+    let totalPage = parseInt(((totalCount - 1) / listCount)) + 1 ;
 
     // 전체 그룹 수
-    var totalGroup = parseInt(((totalPage) -1 / groupCount)) + 1 ;
+    let totalGroup = parseInt(((totalPage) -1 / groupCount)) + 1 ;
 
     // 현제 페이지가 속한 그룹
-    var nowGroup = parseInt(((nowPage -1) / groupCount)) + 1 ;
+    let nowGroup = parseInt(((nowPage -1) / groupCount)) + 1 ;
 
     // 현재 그룹의 시작 페이지 번호
-    var groupStart = parseInt(((nowGroup -1) * groupCount)) + 1 ;
+    let groupStart = parseInt(((nowGroup -1) * groupCount)) + 1 ;
 
     // 현재 그룹의 마지막 페이지 번호
-    var groupEnd = Math.min(totalPage, nowGroup * groupCount);
+    let groupEnd = Math.min(totalPage, nowGroup * groupCount);
 
     // 이전 그룹의 마지막 페이지 번호`
-    var prevGroupLastPage = 0;
-    if (groupStart > groupCount) {prevGroupLastPage = groupStart -1;}
+    let prevGroupLastPage = groupStart -1;
 
     // 다음 그룹의 시작 페이지 번호
-    var nextGroupFirstPage = 0;
+    let nextGroupFirstPage = 0;
     if(groupEnd < totalPage) {nextGroupFirstPage = groupEnd + 1;}
 
     // LIMIT 절에서 사용할 데이터 시작 위치
-    var offset = (nowPage -1) * listCount;
+    let offset = (nowPage -1) * listCount;
 
     // 리턴한 데이터들을 객체로 묶기
     return {

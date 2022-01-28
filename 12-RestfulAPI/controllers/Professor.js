@@ -73,7 +73,31 @@ module.exports = (app) => {
       dbcon.end();
     }
     // 모든 처리에 성공했으므로 정상 조회 결과를 구성
-    res.sendJson({pagenation: pagenation ,item: json });
+    res.sendJson({ pagenation: pagenation, item: json });
+  });
+
+  router.get("/professor/all", async (req, res, next) => {
+    // 데이터 조회 결과가 저장될 빈 변수
+    let json = null;
+
+    try {
+      // 데이터베이스 접속
+      dbcon = await mysql2.createConnection(config.database);
+      await dbcon.connect();
+
+      // 데이터 조회
+      let sql = "SELECT * FROM professor";
+      const [result] = await dbcon.query(sql);
+
+      // 조회 결과를 미리 준비한 변수에 저장함
+      json = result;
+    } catch (e) {
+      return next(e);
+    } finally {
+      dbcon.end();
+    }
+    // 모든 처리에 성공했으므로 정상 조회 결과를 구성
+    res.sendJson({ item: json });
   });
 
   // 특정 항목에 대한 상세 조회
@@ -118,10 +142,10 @@ module.exports = (app) => {
     const comm = req.post("comm");
     const deptno = req.post("deptno");
 
-    try{
-      regexHelper.value(name, '이름이 없습니다.');
-      regexHelper.maxLength(name, 10,  '이름이 너무 깁니다.')
-    }catch(err){
+    try {
+      regexHelper.value(name, "이름이 없습니다.");
+      regexHelper.maxLength(name, 10, "이름이 너무 깁니다.");
+    } catch (err) {
       return next(err);
     }
 

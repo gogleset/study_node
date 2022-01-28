@@ -11,7 +11,7 @@
 
 <body>
     <!-- header -->
-    <div data-include="/professor/inc/header.html"></div>
+    <div data-include="../inc/header.html"></div>
 
     <!-- body -->
     <div class="container">
@@ -57,9 +57,12 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="profno" class="col-md-2 control-label">부서번호</label>
+                <label for="deptno" class="col-md-2 control-label">소속학과</label>
                 <div class="col-md-10">
-                    <input type="text" name="deptno" id="deptno" class="form-control">
+                    <!-- 부모 테이블에 대한 참조키를 입력해야 하는 경우 부모 테이블의 데이터를 조회하여 그 중에서 선택할 수 있도록 UI를 JS 로 구현해야한다.  -->
+                    <select name="deptno" id="deptno" class="form-control">
+                        <option value="">----- 선택하세요 -----</option>
+                    </select>
                 </div>
             </div>
 
@@ -73,16 +76,42 @@
     </div>
 
     <!-- footer -->
-    <div data-include="/professor/inc/footer.html"></div>
+    <div data-include="../inc/footer.html"></div>
 
 
     <!-- script -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
-
+    <script src="../assets/js/include.js "></script>
 
 
     <script>
+        (async () => {
+            // ajax 결과가 저장될 json 
+            let json = null;
+
+            // ajax 요청
+            try {
+                const response = await axios.get('/department/all');
+                json = response.data;
+            } catch (e) {
+                // 에러가 발생한 경우 백엔드가 주는 json 받기
+                const data = e.response.data
+                alert('[' + data.rt + ']' + data.rtmsg);
+                return;
+            }
+
+            if (json != null) {
+                // dropdown객체
+                const deptnoDropdown = document.querySelector("#deptno");
+
+                json.item.map((v, i) => {
+                    const option = document.createElement("option");
+                    option.setAttribute('value', v.deptno);
+                    option.innerHTML = v.dname;
+                    deptnoDropdown.appendChild(option);
+                });
+            }
+        })();
 
         // 수정완료후 submit 이벤트가 발생한 경우
         document.querySelector("#professor-form").addEventListener("submit", async (e) => {
