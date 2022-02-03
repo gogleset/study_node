@@ -176,7 +176,8 @@ app.use(require("./controllers/Department")(app));
 app.use(require('./controllers/Student')(app));
 app.use(require('./controllers/Professor')(app));
 app.use(require('./controllers/Member')(app));
-app.use(require('./controllers/ProfessorPrac')(app))
+app.use(require('./controllers/ProfessorPrac')(app));
+app.use(require('./controllers/import')(app));
 // 런타임 에러가 발생한 경우에 대한 일괄처리
 app.use((err, req, res, next) => {
   // 에러 객체를 만들 때 생성자 파라미터로 전달한 에러메시지

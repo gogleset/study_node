@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button onclick="requestPay()">결제하기</button>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js" type="text/javascript"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const { IMP } = window;
+        IMP.init('imp27242603'); //자신이 발급받능 가맹점 식별코드
+        let requestPay = () => {
+            // IMP.request_pay(param, callback) 결제창 호출
+            IMP.request_pay({ // param
+                pg: "html5_inicis",
+                pay_method: "card",
+                merchant_uid: "ORD20180131-0000023",
+                name: "노르웨이 회전 의자",
+                amount: 100,
+                buyer_email: "gildong@gmail.com",
+                buyer_name: "홍길동",
+                buyer_tel: "010-4242-4242",
+                buyer_addr: "서울특별시 강남구 신사동",
+                buyer_postcode: "01181"
+            }, async (rsp) => {// callback
+                let json = null;
+                if (rsp.success) {
+                    let msg = '결제가 완료되었습니다.';
+                    msg += '고유ID : ' + rsp.imp_uid;
+                    msg += '상점 거래ID : ' + rsp.merchant_uid;
+                    msg += '결제 금액 : ' + rsp.paid_amount;
+                    msg += '카드 승인번호 : ' + rsp.apply_num;
+                    alert(msg);
+
+                    // 아임포트 라우터(백엔드)에 결제정보와 주문번호 투척
+                    try {
+                        const result = await axios.post("/import", {
+                            imp_uid: rsp.imp_uid,
+                            merchant_uid: rsp.merchant_uid
+                        });
+                        console.log("백엔드 전송완료 후 프론트엔드 값 받아오기 성공");
+                        console.log(result.data);
+                    } catch (e) {
+                        msg = e;
+                        alert(msg);
+                    }
+                } else {
+                    let msg = '결제에 실패하였습니다.';
+                    msg += '에러내용 : ' + rsp.error_msg;
+                    alert(msg);
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>
