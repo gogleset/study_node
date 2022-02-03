@@ -177,9 +177,9 @@ const multipart = multer({
 
       // 구성된 정보를 req객체에 추가
       // req.file이 배열이라면?
-      if(req.file instanceof Array){
+      if (req.file instanceof Array) {
         req.file.push(file);
-      }else{
+      } else {
         req.file = file;
       }
       callback(null, saveName);
@@ -577,21 +577,20 @@ router.route("/upload/simple").post((req, res, next) => {
   });
 });
 
-router.route('/upload/multiple')
-.post((req, res, next) => {
+router.route("/upload/multiple").post((req, res, next) => {
   // 요청정보 안에 업로드된 파일의 정보를 저장할 빈 배열 준비
   req.file = [];
 
   // name속성이 myphoto이고 multiple 속성이 부여된 다중 업로드를 처리
-  const upload = multipart.array('myphoto');
+  const upload = multipart.array("myphoto");
 
   upload(req, res, (err) => {
     let result_code = 200;
-    let result_msg = 'ok';
+    let result_msg = "ok";
 
-    if(err){
-      if(err instanceof multer.MulterError){
-        switch (err.code){
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        switch (err.code) {
           case "LIMIT_FILE_COUNT":
             err.result_code = 500;
             err.result_msg = "업로드 가능한 파일 수를 초과했습니다.";
@@ -610,12 +609,12 @@ router.route('/upload/multiple')
       result_code = err.result_code;
       result_msg = err.result_msg;
     }
-    const result = { 
+    const result = {
       rt: result_code,
       rtmsg: result_msg,
-      item: req.file
-    }
-
+      item: req.file,
+    };
+    console.log(req.file);
     res.status(result_code).send(result);
   });
 });

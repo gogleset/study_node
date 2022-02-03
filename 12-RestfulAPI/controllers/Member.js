@@ -5,7 +5,7 @@ const router = require("express").Router();
 const mysql2 = require("mysql2/promise");
 const regexHelper = require("../../helper/RegexHelper");
 const BadRequestException = require("../../exceptions/BadRequestException");
-const utulHelper = require("../../helper/UtilHelper");
+const utilHelper = require("../../helper/UtilHelper");
 
 module.exports = (app) => {
   router.post("/member", async (req, res, next) => {
@@ -71,7 +71,7 @@ module.exports = (app) => {
       logger.debug([result1]);
 
       // 새로 저장된 데이터의 PK값을 활용하여 다시 조회
-      const sql2 = "SELECT * FROM members WHERE id=?";
+      const sql2 = "SELECT userid, password, name, bithdate, gender, email, countrynum, tel FROM members WHERE id=?";
       logger.debug([result1.insertId]);
       const [result2] = await dbcon.query(sql2, [result1.insertId]);
 
