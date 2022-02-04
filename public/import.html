@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,18 +11,19 @@
 <body>
     <button onclick="requestPay()">결제하기</button>
 
+    
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js" type="text/javascript"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
         const { IMP } = window;
-        IMP.init('imp27242603'); //자신이 발급받능 가맹점 식별코드
+        IMP.init('imp27242603'); //자신이 발급받는 가맹점 식별코드
         let requestPay = () => {
             // IMP.request_pay(param, callback) 결제창 호출
             IMP.request_pay({ // param
                 pg: "html5_inicis",
                 pay_method: "card",
-                merchant_uid: "ORD20180131-0000023",
+                merchant_uid: "ORD20180131-0000024",
                 name: "노르웨이 회전 의자",
                 amount: 100,
                 buyer_email: "gildong@gmail.com",

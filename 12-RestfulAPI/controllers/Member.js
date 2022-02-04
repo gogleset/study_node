@@ -4,86 +4,133 @@ const logger = require("../../helper/LogHelper");
 const router = require("express").Router();
 const mysql2 = require("mysql2/promise");
 const regexHelper = require("../../helper/RegexHelper");
+const MultipartException = require("../../exceptions/MultipartException");
 const BadRequestException = require("../../exceptions/BadRequestException");
 const utilHelper = require("../../helper/UtilHelper");
+const multer = require("multer");
 
 module.exports = (app) => {
-  router.post("/member", async (req, res, next) => {
-    //   저장을 위한 파라미터 입력받기
-    const userid = req.post("userid");
-    const password = req.post("password");
-    const name = req.post("name");
-    const birthdate = req.post("birthdate");
-    const gender = req.post("gender");
-    const email = req.post("email");
-    const countrynum = req.post("countrynum");
-    const tel = req.post("tel");
-    const reg_date = req.post("reg_date");
+  let dbcon = null;
 
-    try {
-      regexHelper.value(userid, "아이디 값이 없습니다.");
-      regexHelper.value(password, "비밀번호 값이 없습니다.");
-      regexHelper.value(name, "이름 값이 없습니다.");
-      regexHelper.value(birthdate, "생년월일 값이 없습니다.");
-      regexHelper.value(gender, "성별 값이 없습니다.");
-      regexHelper.value(email, "이메일 값이 없습니다.");
-      regexHelper.value(countrynum, "국가번호 값이 없습니다.");
-      regexHelper.value(tel, "전화번호 값이 없습니다.");
+  /**
+   * 회원가입
+   * [POST] /member/join
+   */
+  router.post("/member/join", async (req, res, next) => {
+    
+    // webhelper에 추가된 기능을 활용하여 업로드 객체 반환받기
+    const multipart = req.getMultipart();
+    logger.debug("접속");
+    // 업로드 수정하기
+    const upload = multipart.single("profile_img");
 
-      regexHelper.maxLength(userid, 30, "아이디가 너무 깁니다.");
-      regexHelper.maxLength(password, 255, "비밀번호가 너무 깁니다.");
-      regexHelper.maxLength(name, 20, "이름이 너무 깁니다.");
-      regexHelper.maxLength(email, 150, "이메일 형식이 너무 깁니다.");
-      regexHelper.maxLength(countrynum, 4, "국가번호가 너무 깁니다.");
-      regexHelper.maxLength(tel, 11, "전화번호가 너무 깁니다.");
+    // 업로드 처리 후 텍스트 파라미터 받기
+    upload(req, res, async (err) => {
+      
+      // 업로드 에러 처리
+      if (err) {
+        throw new MultipartException(err);
+      }
 
-      regexHelper.num(tel, "전화번호가 숫자가 아닌 형식이 들어가 있습니다.");
-      regexHelper.num(countrynum, "국가번호 값이 없습니다.");
-    } catch (err) {
-      return next(err);
-    }
+      // 업로드 된 파일의 정보를 로그로 기록(필요에 따른 선택사항)
+      logger.debug(JSON.stringify(req.file));
 
-    // 데이터 저장하기
-    // 데이터 조회 결과가 저장될 빈 변수
-    let json = null;
+      //   저장을 위한 파라미터 입력받기
+      const user_id = req.post("user_id");
+      const user_pw = req.post("user_pw");
+      const user_name = req.post("user_name");
+      const email = req.post("email");
+      const phone = req.post("phone");
+      const birthday = req.post("birthday");
+      const gender = req.post("gender");
+      const postcode = req.post("postcode");
+      const addr1 = req.post("addr1");
+      const addr2 = req.post("addr2");
+      const photo = req.file.url;
 
-    try {
-      // 데이터 베이스접속
-      dbcon = await mysql2.createConnection(config.database);
-      await dbcon.connect();
+      // 유효성 검사
+      try {
+        regexHelper.value(user_id, "아이디 값이 없습니다.");
+        regexHelper.value(user_pw, "비밀번호 값이 없습니다.");
+        regexHelper.value(user_name, "이름 값이 없습니다.");
+        regexHelper.value(email, "이메일 값이 없습니다.");
+        regexHelper.value(birthday, "생년월일 값이 없습니다.");
+        regexHelper.value(gender, "성별 값이 없습니다.");
+        regexHelper.value(phone, "핸드폰 번호 값이 없습니다.");
 
-      // 데이터 저장하기
-      const sql =
-        "INSERT INTO members (userid, password, name, birthdate, gender, email, countrynum, tel) VALUES (?,?,?,?,?,?,?,?)";
+        regexHelper.maxLength(user_id, 30, "아이디가 너무 깁니다.");
+        regexHelper.maxLength(user_pw, 255, "비밀번호가 너무 깁니다.");
+        regexHelper.maxLength(user_name, 20, "이름이 너무 깁니다.");
+        regexHelper.maxLength(email, 150, "이메일 형식이 너무 깁니다.");
+        regexHelper.maxLength(addr1, 20, "국가번호가 너무 깁니다.");
+        regexHelper.maxLength(phone, 11, "전화번호가 너무 깁니다.");
 
-      const input_data = [
-        userid,
-        password,
-        name,
-        birthdate,
-        gender,
-        email,
-        countrynum,
-        tel,
-      ];
-      logger.debug(input_data);
-      const [result1] = await dbcon.query(sql, input_data);
-      logger.debug([result1]);
+        regexHelper.num(
+          phone,
+          "전화번호가 숫자가 아닌 형식이 들어가 있습니다."
+        );
+        regexHelper.num(postcode, "우편번호 값이 없습니다.");
+      } catch (err) {
+        return next(err);
+      }
 
-      // 새로 저장된 데이터의 PK값을 활용하여 다시 조회
-      const sql2 = "SELECT userid, password, name, bithdate, gender, email, countrynum, tel FROM members WHERE id=?";
-      logger.debug([result1.insertId]);
-      const [result2] = await dbcon.query(sql2, [result1.insertId]);
+      try {
+        // 데이터 베이스접속
+        dbcon = await mysql2.createConnection(config.database);
+        await dbcon.connect();
 
-      // 조회 결과를 미리 준비한 변수에 저장함
-      json = result2;
-    } catch (e) {
-      return next(e);
-    } finally {
-      dbcon.end();
-    }
-    // 모든 처리에 성공했으므로 정상 조회 결과 구성
-    res.sendJson({ item: json });
+        let sql1 = "SELECT COUNT(*) AS cnt FROM members WHERE user_id=?";
+        let args1 = [user_id];
+
+        const [result1] = await dbcon.query(sql1, args1);
+        const totalCount = result1[0].cnt;
+
+        if (totalCount > 0) {
+          throw new BadRequestException("이미 사용중인 아이디입니다.");
+        }
+
+        // 데이터 저장하기
+        let sql2 = "INSERT INTO `members` (";
+        sql2 +=
+          "user_id, user_pw, user_name, email, phone, birthday, gender, postcode, addr1, addr2, photo, ";
+        sql2 += "is_out, is_admin, login_date, reg_date, edit_date";
+        sql2 += ") VALUES (";
+        sql2 +=
+          "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'N', 'N', null, now(), now());";
+
+        const args2 = [
+          user_id,
+          user_pw,
+          user_name,
+          email,
+          phone,
+          birthday,
+          gender,
+          postcode,
+          addr1,
+          addr2,
+          photo,
+        ];
+        await dbcon.query(sql2, args2);
+      } catch (e) {
+        return next(e);
+      } finally {
+        dbcon.end();
+      }
+      // 모든 구현에 성공했다면 가입 환영 메일 구성
+      const receiver = `${user_name} <${email}>`;
+      const subject = `${user_name}님의 회원가입을 환영합니다.`;
+      const html = `<p><strong>${user_name}</strong>님, 회원가입해 주셔서 갑사합니다.</p><p>앞으로 많은 이용 부탁드립니다.</p>`;
+
+      try {
+        res.sendMail(receiver, subject, html);
+      } catch (e) {
+        throw new RuntimeException(
+          "회원가입은 완료 되었지만 가입 환영 메일 발송에 실패했습니다."
+        );
+      }
+      res.sendJson();
+    });
   });
   /**
    * 아이디 중복 검사
@@ -91,7 +138,7 @@ module.exports = (app) => {
    */
   router.post("/member/id_unique_check", async (req, res, next) => {
     // 파라미터 받기
-
+    // 중복검사는 갯수세는게 중요하다
     const user_id = req.post("user_id");
 
     // 유효성검사
@@ -158,14 +205,17 @@ module.exports = (app) => {
 
       // 아이디와 비번이 일치하는 데이터를 조회 (조회결과에서 비밀번호는 제외)
       let sql =
-        "SELECT id, user_id, user_pw, user_name, email, phone, birthday, gender, postcode, addr1, addr2, photo, is_out, is_admin, login_date, reg_date, edit_date FROM members WHERE user_id =? AND user_pw = ?";
+        "SELECT id, user_id, user_pw, user_user_name, email, phone, birthday, gender, postcode, addr1, addr2, photo, is_out, is_admin, login_date, reg_date, edit_date FROM members WHERE user_id =? AND user_pw = ?";
       let args1 = [user_id, user_pw];
 
       const [result] = await dbcon.query(sql, args1);
 
       // 조회된 회원정보 객체를 저장하고 있는 1차원 배열(원소는 1개)
-
       json = result;
+
+      // login_date값을 now()로 update 처리(json데이터는 result가 가져가는게 맞다.)
+      let sql2 = "UPDATE members SET login_date=now() WHERE id=?";
+      dbcon.query(sql2, json[0].id);
     } catch (e) {
       return next(e);
     } finally {
@@ -183,7 +233,7 @@ module.exports = (app) => {
       return next(new BadRequestException("탈퇴한 회원입니다."));
     }
 
-    // 조회 결과를 세션에 저장
+    // 조회 결과를 DB 세션에 저장
     req.session.memberInfo = json[0];
 
     res.sendJson();
@@ -200,7 +250,6 @@ module.exports = (app) => {
 
     res.sendJson({ item: req.session.memberInfo });
   });
-
 
   /**
    * 로그아웃
