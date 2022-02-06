@@ -3,12 +3,7 @@
 // 모듈 참조부분
 const axios = require("axios");
 const router = require("express").Router();
-var Iamport = require("iamport");
-var iamport = new Iamport({
-  impKey: "2254345424515605",
-  impSecret:
-    "28bffa45a4190ad51c9b435bfafe2979414cbe8d48597d282441ce713f1554c606d5366addc442c0",
-});
+
 
 // 라우팅 정의 부분
 module.exports = (app) => {

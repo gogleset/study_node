@@ -9,57 +9,41 @@
 </head>
 
 <body>
-    <button onclick="requestPay()">결제하기</button>
+    <button id="result">결제하기</button>
 
-    
+
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js" type="text/javascript"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="./importfront.js"></script>
     <script>
-        const { IMP } = window;
-        IMP.init('imp27242603'); //자신이 발급받는 가맹점 식별코드
-        let requestPay = () => {
-            // IMP.request_pay(param, callback) 결제창 호출
-            IMP.request_pay({ // param
-                pg: "html5_inicis",
-                pay_method: "card",
-                merchant_uid: "ORD20180131-0000024",
-                name: "노르웨이 회전 의자",
-                amount: 100,
-                buyer_email: "gildong@gmail.com",
-                buyer_name: "홍길동",
-                buyer_tel: "010-4242-4242",
-                buyer_addr: "서울특별시 강남구 신사동",
-                buyer_postcode: "01181"
-            }, async (rsp) => {// callback
-                let json = null;
-                if (rsp.success) {
-                    let msg = '결제가 완료되었습니다.';
-                    msg += '고유ID : ' + rsp.imp_uid;
-                    msg += '상점 거래ID : ' + rsp.merchant_uid;
-                    msg += '결제 금액 : ' + rsp.paid_amount;
-                    msg += '카드 승인번호 : ' + rsp.apply_num;
-                    alert(msg);
+        let c = "ORD20180131-0000030" // 주문번호
+        let n = "식감이 우수한 빵" // 상품명
+        let a = 400;
+        let en = "gildong@gmail.com"
+        let t = "010-2031-2013";
+        let bn = "홍길동"
+        let p = 10231;
+        let ad = "서울시 동작구 대방동"
 
-                    // 아임포트 라우터(백엔드)에 결제정보와 주문번호 투척
-                    try {
-                        const result = await axios.post("/import", {
-                            imp_uid: rsp.imp_uid,
-                            merchant_uid: rsp.merchant_uid
-                        });
-                        console.log("백엔드 전송완료 후 프론트엔드 값 받아오기 성공");
-                        console.log(result.data);
-                    } catch (e) {
-                        msg = e;
-                        alert(msg);
-                    }
-                } else {
-                    let msg = '결제에 실패하였습니다.';
-                    msg += '에러내용 : ' + rsp.error_msg;
-                    alert(msg);
-                }
-            });
-        }
+
+        // console.log(`"${c}"`);
+        // 8개의 인자를 받습니다.
+
+
+        document.querySelector("#result").addEventListener("click", (e) => {
+            e.preventDefault();
+            imports(c,
+                n,
+                a,
+                en,
+                bn,
+                t,
+                ad,
+                p);
+        })
+
+
     </script>
 
 </body>
